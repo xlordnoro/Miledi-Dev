@@ -6,7 +6,5 @@ module.exports = {
     async execute(client) {
         setInterval(client.pickPresence, 3600 * 1000);
         console.log(`${client.user.tag} has logged into discord.`);
-
-        setTimeout(client.checkVideo, 60 * 1000);
     }
 }
