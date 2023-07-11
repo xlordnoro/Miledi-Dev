@@ -1,6 +1,6 @@
 {
   "name": "miledi",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Hi! Hi! Everyone's favorite and cute mage has arrived! *Teehee!",
   "main": "src/bot.js",
   "scripts": {
@@ -17,7 +17,6 @@
     "discord.js": "^14.7.1",
     "dotenv": "^16.0.3",
     "mongoose": "^6.9.1",
-    "rss-parser": "^3.13.0",
     "uuid": "^9.0.0"
   }
 }
