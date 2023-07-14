@@ -2,6 +2,7 @@ const { EmbedBuilder } = require("discord.js");
 const https = require("https");
 const fs = require("fs");
 require("dotenv").config(); // Load environment variables from .env file
+const cron = require("node-cron");
 
 module.exports = async (client) => {
   const checkVideo2 = async () => {
@@ -39,7 +40,6 @@ module.exports = async (client) => {
           const jsonData = JSON.parse(rawData);
 
           if (jsonData.publishedAt === latestVideoPublishedAt) {
-            console.error("Existing video found.");
             return; // Exit if the message is a duplicate
           }
 
@@ -85,31 +85,16 @@ module.exports = async (client) => {
     request.end();
   };
 
-  const scheduleVideoChecks = () => {
-    const now = new Date();
-    const scheduledTime7am = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 7, 1, 0); // Set scheduled time to 7:01 a.m.
-    const scheduledTime7_05am = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 7, 6, 0); // Set scheduled time to 7:06 a.m.
-    const delay7am = scheduledTime7am - now;
-    const delay7_05am = scheduledTime7_05am - now;
-  
-    if (delay7am < 0) {
-      scheduledTime7am.setDate(scheduledTime7am.getDate() + 1); // If it's already past 7:01 a.m. today, schedule it for 7:01 a.m. tomorrow
-    }
-  
-    if (delay7_05am < 0) {
-      scheduledTime7_05am.setDate(scheduledTime7_05am.getDate() + 1); // If it's already past 7:06 a.m. today, schedule it for 7:06 a.m. tomorrow
-    }
-  
-    setTimeout(() => {
-      checkVideo2();
-      setInterval(checkVideo2, 24 * 60 * 60 * 1000); // Repeat every 24 hours
-    }, delay7am);
-  
-    setTimeout(() => {
-      checkVideo2();
-      setInterval(checkVideo2, 24 * 60 * 60 * 1000); // Repeat every 24 hours
-    }, delay7_05am);
-  };
-  
-  module.exports = { scheduleVideoChecks };
+  // Schedule the checkVideo2 function to run at 7:01 a.m., 7:06 a.m. & 10 p.m. every day
+  cron.schedule("1 7 * * *", () => {
+    checkVideo2();
+  });
+
+  cron.schedule("6 7 * * *", () => {
+    checkVideo2();
+  });
+
+  cron.schedule("1 22 * * *", () => {
+    checkVideo2();
+  });
 };
