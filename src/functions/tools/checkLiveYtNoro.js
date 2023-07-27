@@ -2,10 +2,10 @@ const fs = require('fs');
 const { google } = require('googleapis');
 const { EmbedBuilder } = require('discord.js');
 require('dotenv').config();
+const cron = require("node-cron");
 
 const youtube = google.youtube({ version: 'v3', auth: process.env.NORO_DEBUG_LIVE_API_KEY });
 const channelId = 'UCsPsZrQySVRR6so8j5HMqRw'; // Replace with your YouTube channel ID
-const checkInterval = 3600 * 1000; // 1 hour in milliseconds
 
 module.exports = async (client) => {
   async function checkLiveStatus() {
@@ -63,5 +63,9 @@ module.exports = async (client) => {
     }
   }
 
-  setInterval(checkLiveStatus, checkInterval); // Start checking for live status at the specified interval
+  // Schedule the checkLiveStatus function to run every hour
+  const cron = require('node-cron');
+  cron.schedule('0 * * * *', () => {
+    checkLiveStatus();
+  });
 };
