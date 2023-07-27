@@ -3,9 +3,9 @@ const { google } = require('googleapis');
 const { EmbedBuilder } = require('discord.js');
 require('dotenv').config();
 
-const youtube = google.youtube({ version: 'v3', auth: process.env.NORO_API_KEY });
+const youtube = google.youtube({ version: 'v3', auth: process.env.NORO_DEBUG_LIVE_API_KEY });
 const channelId = 'UCsPsZrQySVRR6so8j5HMqRw'; // Replace with your YouTube channel ID
-const checkInterval = 60 * 1000; // 5 seconds
+const checkInterval = 3600 * 1000; // 1 hour in milliseconds
 
 module.exports = async (client) => {
   async function checkLiveStatus() {
