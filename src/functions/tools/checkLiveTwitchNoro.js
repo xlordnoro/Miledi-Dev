@@ -2,6 +2,7 @@ const fs = require('fs');
 const https = require('https');
 const { EmbedBuilder } = require('discord.js');
 require('dotenv').config();
+const cron = require("node-cron");
 
 const twitchClientId = process.env.TWITCH_CLIENT_ID;
 const twitchClientSecret = process.env.TWITCH_CLIENT_SECRET;
