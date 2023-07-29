@@ -9,7 +9,6 @@ let twitchAccessToken = process.env.TWITCH_ACCESS_TOKEN;
 let accessTokenExpiry = 0;
 const twitchRefreshToken = process.env.TWITCH_REFRESH_TOKEN;
 const twitchUserId = process.env.TWITCH_USER_ID;
-const checkInterval = 60 * 1000; // 1 minute
 const tokenRefreshInterval = 60 * 24 * 60 * 1000; // 60 days in milliseconds
 
 module.exports = async (client) => {
@@ -130,9 +129,8 @@ module.exports = async (client) => {
     }
   }
 
-  // Initial check for live status
-  checkLiveStatus();
-
-  // Start checking for live status every specified interval
-  setInterval(checkLiveStatus, checkInterval);
+  // Schedule the checkLiveStatus function to run on every hour
+  cron.schedule("0 * * * *", () => {
+    checkLiveStatus();
+  });
 };
