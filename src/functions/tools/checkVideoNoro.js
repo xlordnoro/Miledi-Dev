@@ -7,7 +7,7 @@ const cron = require("node-cron");
 module.exports = async (client) => {
   const checkVideo2 = async () => {
     const channelId = "UCsPsZrQySVRR6so8j5HMqRw"; // YouTube channel ID
-    const apiKey = process.env.NORO_API_KEY; // Use the YouTube API key from .env file
+    const apiKey = process.env.YOUTUBE_API_KEY; // Use the YouTube API key from .env file
 
     const url = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&part=snippet,id&order=date&maxResults=1`;
 

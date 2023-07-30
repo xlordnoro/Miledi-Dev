@@ -4,7 +4,7 @@ const { EmbedBuilder } = require('discord.js');
 require('dotenv').config();
 const cron = require("node-cron");
 
-const youtube = google.youtube({ version: 'v3', auth: process.env.NORO_DEBUG_LIVE_API_KEY });
+const youtube = google.youtube({ version: 'v3', auth: process.env.YOUTUBE_API_KEY });
 const channelId = 'UCsPsZrQySVRR6so8j5HMqRw'; // Replace with your YouTube channel ID
 
 module.exports = async (client) => {
