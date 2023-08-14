@@ -3,6 +3,7 @@ const https = require("https");
 const fs = require("fs");
 require("dotenv").config(); // Load environment variables from .env file
 const cron = require("node-cron");
+const he = require("he"); // Import the he library
 
 module.exports = async (client) => {
   const checkVideo2 = async () => {
@@ -51,7 +52,9 @@ module.exports = async (client) => {
           const guild = await client.guilds.fetch("1073459808696537140").catch(console.error);
           const channel = await guild.channels.fetch("1107870645771051078").catch(console.error);
 
-          const { title, thumbnails, channelTitle } = latestVideoData.snippet;
+          const { title: encodedTitle, thumbnails, channelTitle } = latestVideoData.snippet;
+          const title = he.decode(encodedTitle); // Decode the HTML-encoded title
+          
           const videoUrl = `https://www.youtube.com/watch?v=${latestVideoId}`;
           const thumbnailUrl = thumbnails.maxres?.url || thumbnails.high?.url || thumbnails.default?.url || "";
           const embed = new EmbedBuilder({
