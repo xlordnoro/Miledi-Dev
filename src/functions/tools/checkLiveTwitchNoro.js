@@ -9,7 +9,7 @@ const twitchClientSecret = process.env.TWITCH_CLIENT_SECRET;
 let twitchAccessToken = process.env.TWITCH_ACCESS_TOKEN;
 let accessTokenExpiry = 0;
 const twitchRefreshToken = process.env.TWITCH_REFRESH_TOKEN;
-const twitchUserId = process.env.TWITCH_USER_ID;
+const twitchUserId = process.env.TWITCH_NORO_USER_ID;
 const tokenRefreshInterval = 60 * 24 * 60 * 1000; // 60 days in milliseconds
 
 module.exports = async (client) => {
@@ -44,6 +44,10 @@ module.exports = async (client) => {
           const tokenData = JSON.parse(body);
           twitchAccessToken = tokenData.access_token;
           accessTokenExpiry = Date.now() + tokenData.expires_in * 1000;
+
+          // Update the .env file with the new access token
+          updateEnvFile('TWITCH_ACCESS_TOKEN', twitchAccessToken);
+
           console.log('Twitch API Access Token has been refreshed.');
         });
       });
@@ -135,3 +139,18 @@ module.exports = async (client) => {
     checkLiveStatus();
   });
 };
+
+// Function to update .env file with new values
+function updateEnvFile(key, value) {
+  // Read the existing .env file
+  const envPath = './.env'; // Update with the path to your .env file
+  const data = fs.readFileSync(envPath, 'utf8');
+
+  // Replace the existing value with the new value
+  const updatedData = data.replace(new RegExp(`${key}=.*$`, 'm'), `${key}=${value}`);
+
+  // Write the updated content back to the .env file
+  fs.writeFileSync(envPath, updatedData, 'utf8');
+
+  console.log(`Updated .env file with ${key}.`);
+}

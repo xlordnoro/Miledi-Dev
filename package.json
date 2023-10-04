@@ -1,6 +1,6 @@
 {
   "name": "miledi_dev",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Hi! Hi! Everyone's favorite and cute mage has arrived! *Teehee!",
   "main": "src/bot.js",
   "scripts": {
