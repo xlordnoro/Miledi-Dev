@@ -10,7 +10,7 @@ let twitchAccessToken = process.env.TWITCH_ACCESS_TOKEN;
 let accessTokenExpiry = 0;
 const twitchRefreshToken = process.env.TWITCH_REFRESH_TOKEN;
 const twitchUserId = process.env.TWITCH_NORO_USER_ID;
-const tokenRefreshInterval = 60 * 24 * 60 * 1000; // 60 days in milliseconds
+const tokenRefreshInterval = 60 * 24 * 60 * 60 * 1000; // 60 days in milliseconds
 
 module.exports = async (client) => {
   async function refreshToken() {
