@@ -10,12 +10,16 @@ let twitchAccessToken = process.env.TWITCH_ACCESS_TOKEN;
 let accessTokenExpiry = 0;
 const twitchRefreshToken = process.env.TWITCH_REFRESH_TOKEN;
 const twitchUserId = process.env.TWITCH_PMG_USER_ID;
-const tokenRefreshInterval = 60 * 24 * 60 * 1000; // 60 days in milliseconds
 
 module.exports = async (client) => {
   async function refreshToken() {
     // Check if the access token is expired
     if (Date.now() > accessTokenExpiry) {
+      // Revoke the previous access token
+      if (twitchAccessToken) {
+        await revokeToken(twitchAccessToken);
+      }
+
       // Refresh the access token using the refresh token
       const data = JSON.stringify({
         grant_type: 'refresh_token',
@@ -61,8 +65,40 @@ module.exports = async (client) => {
     }
   }
 
-  // Call refreshToken every 60 days (tokenRefreshInterval)
-  setInterval(refreshToken, tokenRefreshInterval);
+  async function revokeToken(tokenToRevoke) {
+    const querystring = require('querystring');
+  
+    const data = querystring.stringify({
+      client_id: twitchClientId,
+      token: tokenToRevoke,
+    });
+  
+    const options = {
+      hostname: 'id.twitch.tv',
+      port: 443,
+      path: '/oauth2/revoke',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(data),
+      },
+    };
+  
+    const req = https.request(options, (res) => {
+      if (res.statusCode === 200) {
+        console.log('Access token revoked successfully.');
+      } else {
+        console.error('Error revoking access token:', res.statusCode, res.statusMessage);
+      }
+    });
+  
+    req.on('error', (error) => {
+      console.error('Error revoking access token:', error);
+    });
+  
+    req.write(data);
+    req.end();
+  }  
 
   async function checkLiveStatus() {
     try {
@@ -130,13 +166,14 @@ module.exports = async (client) => {
 
     const channel = await guild.channels.fetch('1158958077203197952').catch(console.error);
     if (channel) {
-      await channel.send({ content: '@everyone <@&1073461424577335327> Pyle is now live on Twitch!', embeds: [liveEmbed], allowedMentions: { roles: ["1073461424577335327"] } });
+      await channel.send({ content: '@everyone <@&1073461424577335327> Pyle is now live on Twitch!', embeds: [liveEmbed], allowedMentions: { roles: ["1073461424577335327"] }});
     }
   }
 
   // Schedule the checkLiveStatus function to run on every hour
   cron.schedule("0 * * * *", () => {
     checkLiveStatus();
+    refreshToken()
   });
 };
 
