@@ -4,28 +4,28 @@ const { EmbedBuilder } = require('discord.js');
 require('dotenv').config();
 const cron = require("node-cron");
 
-const twitchClientId = process.env.TWITCH_CLIENT_ID;
-const twitchClientSecret = process.env.TWITCH_CLIENT_SECRET;
-let twitchAccessToken = process.env.TWITCH_ACCESS_TOKEN;
+const pmgtwitchClientId = process.env.PMG_TWITCH_CLIENT_ID;
+const pmgtwitchClientSecret = process.env.PMG_TWITCH_CLIENT_SECRET;
+let pmgtwitchAccessToken = process.env.PMG_TWITCH_ACCESS_TOKEN;
 let accessTokenExpiry = 0;
-const twitchRefreshToken = process.env.TWITCH_REFRESH_TOKEN;
-const twitchUserId = process.env.TWITCH_PMG_USER_ID;
+const pmgtwitchRefreshToken = process.env.PMG_TWITCH_REFRESH_TOKEN;
+const pmgtwitchUserId = process.env.TWITCH_PMG_USER_ID;
 
 module.exports = async (client) => {
-  async function refreshToken() {
+  async function refreshToken2() {
     // Check if the access token is expired
     if (Date.now() > accessTokenExpiry) {
       // Revoke the previous access token
-      if (twitchAccessToken) {
-        await revokeToken(twitchAccessToken);
+      if (pmgtwitchAccessToken) {
+        await revokeToken2(pmgtwitchAccessToken);
       }
 
       // Refresh the access token using the refresh token
       const data = JSON.stringify({
         grant_type: 'refresh_token',
-        refresh_token: twitchRefreshToken,
-        client_id: twitchClientId,
-        client_secret: twitchClientSecret,
+        refresh_token: pmgtwitchRefreshToken,
+        client_id: pmgtwitchClientId,
+        client_secret: pmgtwitchClientSecret,
       });
 
       const options = {
@@ -46,11 +46,11 @@ module.exports = async (client) => {
         });
         res.on('end', () => {
           const tokenData = JSON.parse(body);
-          twitchAccessToken = tokenData.access_token;
+          pmgtwitchAccessToken = tokenData.access_token;
           accessTokenExpiry = Date.now() + tokenData.expires_in * 1000;
 
           // Update the .env file with the new access token
-          updateEnvFile('TWITCH_ACCESS_TOKEN', twitchAccessToken);
+          updateEnvFile('PMG_TWITCH_ACCESS_TOKEN', pmgtwitchAccessToken);
 
           console.log('Twitch API Access Token has been refreshed.');
         });
@@ -65,11 +65,11 @@ module.exports = async (client) => {
     }
   }
 
-  async function revokeToken(tokenToRevoke) {
+  async function revokeToken2(tokenToRevoke) {
     const querystring = require('querystring');
   
     const data = querystring.stringify({
-      client_id: twitchClientId,
+      client_id: pmgtwitchClientId,
       token: tokenToRevoke,
     });
   
@@ -100,16 +100,16 @@ module.exports = async (client) => {
     req.end();
   }  
 
-  async function checkLiveStatus() {
+  async function checkLiveStatus2() {
     try {
       const options = {
         headers: {
-          'Client-ID': twitchClientId, // Replace with your Twitch Client ID
-          'Authorization': `Bearer ${twitchAccessToken}`,
+          'Client-ID': pmgtwitchClientId, // Replace with your Twitch Client ID
+          'Authorization': `Bearer ${pmgtwitchAccessToken}`,
         },
       };
 
-      https.get(`https://api.twitch.tv/helix/streams?user_id=${twitchUserId}`, options, (response) => {
+      https.get(`https://api.twitch.tv/helix/streams?user_id=${pmgtwitchUserId}`, options, (response) => {
         let data = '';
         response.on('data', (chunk) => {
           data += chunk;
@@ -172,8 +172,8 @@ module.exports = async (client) => {
 
   // Schedule the checkLiveStatus function to run on every hour
   cron.schedule("0 * * * *", () => {
-    checkLiveStatus();
-    refreshToken()
+    refreshToken2();
+    checkLiveStatus2();
   });
 };
 
