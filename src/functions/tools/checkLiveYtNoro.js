@@ -66,6 +66,6 @@ module.exports = async (client) => {
   // Schedule the checkLiveStatus function to run every hour
   const cron = require('node-cron');
   cron.schedule('0 * * * *', () => {
-    checkLiveStatus();
+    //checkLiveStatus();
   });
 };
