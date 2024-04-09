@@ -172,7 +172,7 @@ module.exports = async (client) => {
 
   // Schedule the checkLiveStatus function to run on every hour
   cron.schedule("0 * * * *", () => {
-    //refreshToken2();
+    refreshToken2();
     checkLiveStatus2();
   });
 };
