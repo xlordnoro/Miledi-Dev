@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const axios = require('axios');
+const ping = require('ping');
 require('dotenv').config();
 
 module.exports = async (client) => {
@@ -44,6 +45,7 @@ module.exports = async (client) => {
             console.log('Telegram message sent successfully!');
         } catch (error) {
             console.error('Error sending Telegram message:', error);
+            throw error;
         }
     }
 
@@ -57,8 +59,13 @@ module.exports = async (client) => {
             console.log('Discord message sent successfully!');
         } catch (error) {
             console.error('Error sending Discord message:', error);
+            throw error;
         }
     }
+
+    const pendingMessages = [];
+    let disconnectLogged = false;
+    let reconnectLogged = false;
 
     const executeLoginPing = async () => {
         if (client.user) {
@@ -75,26 +82,145 @@ module.exports = async (client) => {
         executeLoginPing();
     });
 
+    const notifyDisconnect = () => {
+        if (!disconnectLogged) {
+            const offlineMessage = `${client.user.tag} has gone offline.`;
+            pendingMessages.push({
+                type: 'email',
+                subject: `${client.user.tag} Offline`,
+                text: offlineMessage
+            });
+            pendingMessages.push({
+                type: 'telegram',
+                text: offlineMessage
+            });
+            pendingMessages.push({
+                type: 'discord',
+                text: offlineMessage
+            });
+            console.log('Internet connection lost. Messages queued.');
+            disconnectLogged = true;
+            reconnectLogged = false;
+        }
+    };
+
+    const notifyReconnect = async () => {
+        if (!reconnectLogged) {
+            const reconnectMessage = `${client.user.tag} has reconnected.`;
+            pendingMessages.push({
+                type: 'email',
+                subject: `${client.user.tag} Reconnected`,
+                text: reconnectMessage
+            });
+            pendingMessages.push({
+                type: 'telegram',
+                text: reconnectMessage
+            });
+            pendingMessages.push({
+                type: 'discord',
+                text: reconnectMessage
+            });
+            console.log('Internet connection restored. Messages queued.');
+            reconnectLogged = true;
+            await processPendingMessages();
+        }
+    };
+
+    const processPendingMessages = async () => {
+        while (pendingMessages.length > 0) {
+            const message = pendingMessages.shift();
+            try {
+                if (message.type === 'email') {
+                    await sendEmail(message.subject, message.text);
+                } else if (message.type === 'telegram') {
+                    await sendTelegramMessage(message.text);
+                } else if (message.type === 'discord') {
+                    await sendDiscordMessage(message.text);
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                pendingMessages.unshift(message); // Re-queue the message
+                break;
+            }
+        }
+    };
+
+    const checkInternetConnectivity = async () => {
+        try {
+            const res = await ping.promise.probe('8.8.8.8');
+            if (!res.alive) {
+                console.log('Internet connection lost. Triggering disconnect...');
+                notifyDisconnect();
+                client.emit('disconnect');
+            } else {
+                if (disconnectLogged) {
+                    await notifyReconnect();
+                    disconnectLogged = false; // Reset the flag after processing messages
+                }
+            }
+        } catch (error) {
+            console.error('Error checking internet connectivity:', error);
+        }
+    };
+
+    setInterval(checkInternetConnectivity, 600000);
+
     client.on('disconnect', async () => {
-        const offlineMessage = `${client.user.tag} has gone offline.`;
-        await sendEmail(`${client.user.tag} Offline`, offlineMessage);
-        await sendTelegramMessage(offlineMessage);
-        await sendDiscordMessage(offlineMessage);
+        if (!disconnectLogged) {
+            const offlineMessage = `${client.user.tag} has gone offline.`;
+            pendingMessages.push({
+                type: 'email',
+                subject: `${client.user.tag} Offline`,
+                text: offlineMessage
+            });
+            pendingMessages.push({
+                type: 'telegram',
+                text: offlineMessage
+            });
+            pendingMessages.push({
+                type: 'discord',
+                text: offlineMessage
+            });
+            console.log('Bot disconnected. Messages queued.');
+            disconnectLogged = true;
+        }
     });
 
     client.on('error', async (error) => {
         const errorMessage = `An error occurred: ${error.message}`;
-        await sendEmail(`${client.user.tag} Error`, errorMessage);
-        await sendTelegramMessage(errorMessage);
-        await sendDiscordMessage(errorMessage);
+        pendingMessages.push({
+            type: 'email',
+                subject: `${client.user.tag} Error`,
+            text: errorMessage
+        });
+        pendingMessages.push({
+            type: 'telegram',
+            text: errorMessage
+        });
+        pendingMessages.push({
+            type: 'discord',
+            text: errorMessage
+        });
+        console.log('Error occurred. Messages queued.');
     });
 
     process.on('SIGINT', async () => {
         console.log('SIGINT received. Terminating the bot...');
         const disconnectMessage = `${client.user.tag} has been disconnected.`;
-        await sendEmail(`${client.user.tag} Disconnected`, disconnectMessage);
-        await sendTelegramMessage(disconnectMessage);
-        await sendDiscordMessage(disconnectMessage);
+        pendingMessages.push({
+            type: 'email',
+            subject: `${client.user.tag} Disconnected`,
+            text: disconnectMessage
+        });
+        pendingMessages.push({
+            type: 'telegram',
+            text: disconnectMessage
+        });
+        pendingMessages.push({
+            type: 'discord',
+            text: disconnectMessage
+        });
+        await processPendingMessages();
         process.exit(0); // Terminate the process
     });
 };

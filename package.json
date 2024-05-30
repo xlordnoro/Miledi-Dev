@@ -1,6 +1,6 @@
 {
   "name": "miledi_dev",
-  "version": "1.7.2",
+  "version": "1.8.0",
   "description": "Hi! Hi! Everyone's favorite and cute mage has arrived! *Teehee!",
   "main": "src/bot.js",
   "scripts": {
@@ -22,6 +22,7 @@
     "mongoose": "^6.9.1",
     "node-cron": "^3.0.2",
     "nodemailer": "^6.9.13",
+    "ping": "^0.4.4",
     "uuid": "^9.0.0"
   }
 }
