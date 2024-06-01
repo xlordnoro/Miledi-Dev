@@ -65,7 +65,6 @@ module.exports = async (client) => {
 
     const pendingMessages = [];
     let disconnectLogged = false;
-    let reconnectLogged = false;
 
     const executeLoginPing = async () => {
         if (client.user) {
@@ -100,30 +99,15 @@ module.exports = async (client) => {
             });
             console.log('Internet connection lost. Messages queued.');
             disconnectLogged = true;
-            reconnectLogged = false;
         }
     };
 
     const notifyReconnect = async () => {
-        if (!reconnectLogged) {
-            const reconnectMessage = `${client.user.tag} has reconnected.`;
-            pendingMessages.push({
-                type: 'email',
-                subject: `${client.user.tag} Reconnected`,
-                text: reconnectMessage
-            });
-            pendingMessages.push({
-                type: 'telegram',
-                text: reconnectMessage
-            });
-            pendingMessages.push({
-                type: 'discord',
-                text: reconnectMessage
-            });
-            console.log('Internet connection restored. Messages queued.');
-            reconnectLogged = true;
-            await processPendingMessages();
-        }
+        const reconnectMessage = `${client.user.tag} has reconnected.`;
+        await sendEmail(`${client.user.tag} Reconnected`, reconnectMessage);
+        await sendTelegramMessage(reconnectMessage);
+        await sendDiscordMessage(reconnectMessage);
+        console.log('Reconnected. Messages sent.');
     };
 
     const processPendingMessages = async () => {
@@ -154,6 +138,7 @@ module.exports = async (client) => {
                 client.emit('disconnect');
             } else {
                 if (disconnectLogged) {
+                    await processPendingMessages();
                     await notifyReconnect();
                     disconnectLogged = false; // Reset the flag after processing messages
                 }
@@ -163,7 +148,7 @@ module.exports = async (client) => {
         }
     };
 
-    setInterval(checkInternetConnectivity, 600000);
+    setInterval(checkInternetConnectivity, 600000); // 10 minutes
 
     client.on('disconnect', async () => {
         if (!disconnectLogged) {
@@ -190,7 +175,7 @@ module.exports = async (client) => {
         const errorMessage = `An error occurred: ${error.message}`;
         pendingMessages.push({
             type: 'email',
-                subject: `${client.user.tag} Error`,
+            subject: `${client.user.tag} Error`,
             text: errorMessage
         });
         pendingMessages.push({
@@ -223,4 +208,22 @@ module.exports = async (client) => {
         await processPendingMessages();
         process.exit(0); // Terminate the process
     });
+
+    // Heartbeat mechanism
+    const HEARTBEAT_INTERVAL = 60000; // 1 minute
+    const MONITOR_URL = process.env.MONITOR_URL; // Your monitoring service URL
+
+    const sendHeartbeat = async () => {
+        try {
+            await axios.post(MONITOR_URL, {
+                botId: process.env.BOT_ID,
+                timestamp: new Date().toISOString()
+            });
+            console.log('Heartbeat sent successfully!');
+        } catch (error) {
+            console.error('Error sending heartbeat:', error);
+        }
+    };
+
+    setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
 };
