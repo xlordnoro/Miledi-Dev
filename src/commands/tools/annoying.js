@@ -1,6 +1,7 @@
 //Define any of the required libraries or files to externally load/call for the command here.
 
 const {
+  MessageFlags,
   SlashCommandBuilder,
   ActionRowBuilder,
   ButtonBuilder,
@@ -90,7 +91,7 @@ module.exports = {
 
       await interaction.reply({
         content: `Message sent.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
 
       //Sends the output of the embed to a different channel and pings the role via their id. Otherwise, print they lack the role required to run the command.
@@ -129,7 +130,7 @@ module.exports = {
     } else {
       await interaction.reply({
         content: `You do not have the ${role.name} role.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

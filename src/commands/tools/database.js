@@ -1,7 +1,7 @@
 //Define any of the required libraries or files to externally load/call for the command here.
 
 const Guild = require("../../Schemas/guild");
-const { SlashCommandBuilder } = require("discord.js");
+const { MessageFlags, SlashCommandBuilder } = require("discord.js");
 const mongoose = require("mongoose");
 
 //Creates the slash command and fetches the users role for verification
@@ -13,11 +13,11 @@ module.exports = {
   async execute(interaction, client) {
     const { roles } = interaction.member;
     const role = await interaction.guild.roles
-      .fetch("939318588605603850")
+      .fetch("1073460830110228611")
       .catch(console.error);
 
     //Cross-checks the fetch from earlier and if the user has the role, run the command.
-    if (roles.cache.has("939318588605603850")) {
+    if (roles.cache.has("1073460830110228611")) {
       let guildProfile = await Guild.findOne({ guildId: interaction.guild.id });
       if (!guildProfile) {
         guildProfile = await new Guild({
@@ -34,20 +34,20 @@ module.exports = {
         await guildProfile.save().catch(console.error);
         await interaction.reply({
           content: `Server Name: ${guildProfile.guildName}`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         console.log(guildProfile);
       } else {
         await interaction.reply({
           content: `Server ID: ${guildProfile.guildId}`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         console.log(guildProfile);
       }
     } else {
       await interaction.reply({
         content: `You do not have the ${role.name} role.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },
