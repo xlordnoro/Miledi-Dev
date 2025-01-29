@@ -1,8 +1,9 @@
-const chalk = require("chalk");
+//const chalk = require("chalk");
 
 module.exports = {
     name: "connecting",
-    execute() {
+    async execute() {
+        const chalk = (await import("chalk")).default;
         console.log(chalk.cyan("[Database Status]: Connecting..."));
     },
 };

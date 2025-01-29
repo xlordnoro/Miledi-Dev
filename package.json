@@ -1,6 +1,6 @@
 {
   "name": "miledi_dev",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Hi! Hi! Everyone's favorite and cute mage has arrived! *Teehee!",
   "main": "src/bot.js",
   "scripts": {
@@ -10,19 +10,19 @@
   "author": "Noro",
   "license": "ISC",
   "dependencies": {
-    "@discordjs/rest": "^1.5.0",
-    "axios": "^1.7.5",
-    "chalk": "^4.1.2",
-    "discord-api-types": "^0.37.31",
+    "@discordjs/rest": "^2.4.2",
+    "axios": "^1.7.9",
+    "chalk": "^5.4.1",
+    "discord-api-types": "^0.37.118",
     "discord-embedbuilder": "^4.0.0",
-    "discord.js": "^14.7.1",
-    "dotenv": "^16.0.3",
-    "googleapis": "^123.0.0",
+    "discord.js": "^14.17.3",
+    "dotenv": "^16.4.7",
+    "googleapis": "^144.0.0",
     "he": "^1.2.0",
     "mongoose": "^8.9.5",
-    "node-cron": "^3.0.2",
-    "nodemailer": "^6.9.13",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.10.0",
     "ping": "^0.4.4",
-    "uuid": "^9.0.0"
+    "uuid": "^11.0.5"
   }
 }
