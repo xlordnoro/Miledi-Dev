@@ -1,6 +1,6 @@
 //Define any of the required libraries or files to externally load/call for the command here.
 
-const Guild = require("../../Schemas/guild");
+const Guild = require("../../schemas/guild");
 const { MessageFlags, SlashCommandBuilder } = require("discord.js");
 const mongoose = require("mongoose");
 
